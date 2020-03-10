@@ -1,0 +1,51 @@
+import pandas as pd
+purchase_df = pd.read_csv (r'Resources\purchase_data.csv')
+purchase_df
+
+#square [] only when its a list of things, if its one item then you can use ()
+demo_df = purchase_df.drop_duplicates(['SN', 'Age', 'Gender'])
+gender_gb = demo_df.groupby('Gender')
+gender_count = gender_gb.count()['SN']
+unique_users = purchase_df['SN'].nunique()
+unique_items = purchase_df['Item Name'].nunique()
+percent_users = gender_count/unique_users
+avg_price = purchase_df['Price'].mean()
+avg_per_gender = purchase_df.groupby('Gender').mean()
+purchase_ct = purchase_df.count()['Purchase ID']
+ttl_rev = purchase_df.sum()['Price']
+most_popular = purchase_df.groupby('Item Name')
+top_five_spenders = purchase_df.nlargest(5, 'Price')['SN']
+
+#takes in a list or dictionary - will build of columns and rows off of that
+gender_ct_per = pd.DataFrame({
+    "gender_count": gender_count,
+    "percent_users": percent_users})
+
+#reserved word when green
+bins = [0, 9.9, 14.9, 19.9, 24.9, 29.9, 34.9, 39.9, 1000]
+age_bins = ['0-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40+']
+purchase_df['Player Age'] = pd.cut(demo_df["Age"],
+                                  bins, 
+                                    labels = age_bins,
+                                  include_lowest=True)
+purchase_df['Gender'] = pd.cut(gender_ct_per["gender_count"],
+                                  bins, 
+                                    labels = age_bins,
+                                  include_lowest=True)
+avg_price_age = purchase_df.groupby('Player Age').mean()['Price']
+count_age = purchase_df.groupby('Player Age').count()['Purchase ID']
+avg_price_gender = purchase_df.groupby('Player Age').mean()['Price']
+count_gender = purchase_df.groupby('Player Age').count()['Purchase ID']
+
+print(f'Total Number of Players: {unique_users}')
+print('___________')
+print(f'Number of Unique Items: {unique_items}')
+print(f'Average Purchase Price: ${round(avg_price, 2)}')
+print(f'Total Number of Purchases: {purchase_ct}')
+print(f'Total Revenue: ${round(ttl_rev,2)}')
+print('___________')
+print('Gender Demographics')
+print(f'Gender Count/Percentage: {gender_ct_per}')
+
+print(f'Price Per Age: {round(avg_price_age,2), (count_age)}')
+top_five_spenders
